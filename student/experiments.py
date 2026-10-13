@@ -294,3 +294,96 @@ def run_experiment(
         "bundle": bundle,
     }
 
+
+def run_rank_ablation(
+    repo_root,
+    data_dir,
+    run_root,
+    base_setup="E1",
+    split="test",
+    micro_batch_size=1,
+    grad_accum=8,
+    max_steps=None,
+    checkpoint_every=25,
+    remote_repo_id=None,
+    token=None,
+    remote_required=True,
+    on_step=None,
+):
+    """Run E4 rank 4 and 64 with one fixed baseline and identical training controls."""
+    if base_setup not in ("E1", "E2", "E3"):
+        raise ValueError("Rank ablation baseline must be E1, E2, or E3")
+    results = []
+    for rank in (4, 64):
+        result = run_experiment(
+            experiment="E4",
+            repo_root=repo_root,
+            data_dir=data_dir,
+            run_root=run_root,
+            split=split,
+            e4_base=base_setup,
+            e4_rank=rank,
+            micro_batch_size=micro_batch_size,
+            grad_accum=grad_accum,
+            max_steps=max_steps,
+            checkpoint_every=checkpoint_every,
+            remote_repo_id=remote_repo_id,
+            token=token,
+            remote_required=remote_required,
+            evaluate=True,
+            on_step=on_step,
+        )
+        results.append({key: value for key, value in result.items() if key != "bundle"})
+        del result
+        try:
+            import gc
+            import torch
+
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except ImportError:
+            pass
+    if [result["run_id"] for result in results] != [
+        f"e4_rank_4_base_{base_setup.lower()}",
+        f"e4_rank_64_base_{base_setup.lower()}",
+    ]:
+        raise RuntimeError("E4 rank pair did not complete both requested variants")
+    return results
+
+
+def compare_rank_evidence(evidence_rank_4, evidence_rank_64):
+    """Summarize the two real E4 scorer JSON files without inventing measurements."""
+    first = json.loads(Path(evidence_rank_4).read_text(encoding="utf-8"))
+    second = json.loads(Path(evidence_rank_64).read_text(encoding="utf-8"))
+    for evidence in (first, second):
+        if evidence.get("split") != "test":
+            raise ValueError("E4 rank comparison requires full test-split evidence")
+        if evidence.get("missing_predictions") != 0:
+            raise ValueError("E4 rank comparison requires complete predictions")
+        if not evidence.get("f1_ci95") or len(evidence["f1_ci95"]) != 2:
+            raise ValueError("E4 evidence must contain a CI95 interval")
+        for key in ("trainable_params", "peak_vram_gb", "train_minutes"):
+            if float(evidence.get("meta", {}).get(key, 0)) <= 0:
+                raise ValueError(f"E4 evidence is missing positive measured metadata: {key}")
+    if first.get("dataset_version") != second.get("dataset_version"):
+        raise ValueError("E4 rank results use different dataset versions")
+    return {
+        "dataset_version": first["dataset_version"],
+        "split": "test",
+        "rank_4": {
+            "f1": first["micro"]["f1"],
+            "ci95": first["f1_ci95"],
+            "trainable_params": first["meta"]["trainable_params"],
+            "peak_vram_gb": first["meta"]["peak_vram_gb"],
+            "train_minutes": first["meta"]["train_minutes"],
+        },
+        "rank_64": {
+            "f1": second["micro"]["f1"],
+            "ci95": second["f1_ci95"],
+            "trainable_params": second["meta"]["trainable_params"],
+            "peak_vram_gb": second["meta"]["peak_vram_gb"],
+            "train_minutes": second["meta"]["train_minutes"],
+        },
+    }
+
