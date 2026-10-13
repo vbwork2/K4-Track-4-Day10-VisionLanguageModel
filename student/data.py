@@ -2,6 +2,8 @@
 
 import json
 import math
+import subprocess
+import sys
 from pathlib import Path
 
 from scripts.labcommon import CLASSES, read_jsonl
@@ -13,6 +15,29 @@ EXPECTED_COUNTS = {
     "val": {"images": 276, "boxes": {"pothole": 66, "crack": 470, "manhole": 103}},
     "test": {"images": 311, "boxes": {"pothole": 121, "crack": 299, "manhole": 163}},
 }
+
+
+def prepare_public_dataset(repo_dir, data_dir, work_dir, source_dir=None, zip_path=None):
+    """Prepare Colab data through the unchanged instructor script, then validate it."""
+    if source_dir and zip_path:
+        raise ValueError("Choose either an extracted dataset directory or a ZIP file")
+    data_dir = Path(data_dir)
+    if not (data_dir / "splits" / "meta.json").is_file():
+        if zip_path:
+            source_args = ["--zip", str(zip_path)]
+        else:
+            if not source_dir:
+                import kagglehub
+                from scripts.prepare_data import KAGGLE_SLUG
+
+                source_dir = kagglehub.dataset_download(KAGGLE_SLUG)
+            source_args = ["--source", str(source_dir)]
+        subprocess.run(
+            [sys.executable, str(Path(repo_dir) / "scripts" / "prepare_data.py"),
+             *source_args, "--out", str(data_dir), "--work", str(work_dir)],
+            cwd=repo_dir, check=True,
+        )
+    return validate_splits(data_dir, check_expected=True)
 
 
 def validate_splits(data_dir, check_expected=True, require_images=True):

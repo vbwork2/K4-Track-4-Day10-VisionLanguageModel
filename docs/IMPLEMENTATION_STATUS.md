@@ -38,6 +38,14 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 | CP08 | `98dae8f` | Three files; `git show --stat`: 111 insertions, 3 deletions; class-aware greedy IoU reward, record conversion, six reward/conversion cases | CPU: 112 passed, 1 skipped; GRPO **NOT_RUN** because local runtime has no PyTorch/CUDA or Kaggle session | Reward complete; optional GRPO pending |
 | CP09 | `60ec5da` | 12 files; `git show --stat`: 1,000 insertions, 54 deletions; both notebooks, Kaggle runbook, truthful REPORT, split metadata validation, checkpoint integrity fix, final static/CPU checks | CPU: 113 passed, 2 skipped; compileall and both notebook JSON/Python-cell checks pass; official checker: 6 FAIL, 1 WARN due unrun Kaggle evidence, absent `data/splits/meta.json`, and unfilled name; GPU **NOT_RUN** | Code and notebook ready; experiment evidence pending |
 
+## Colab migration (2026-10-13)
+
+- User changed the requested GPU platform from Kaggle to Google Colab. The existing Chrome Colab page confirmed the selected account; no account address or credentials are embedded in notebook source.
+- Added `colab_day10_qlora_resume.ipynb` (23 cells) and `docs/COLAB_RUNBOOK.md`. Both entry notebooks use the same training/checkpoint package. The original lab retains 22 cells and numbered sections.
+- Shared `prepare_public_dataset` downloads the public dataset through `kagglehub`, supports an extracted source or ZIP override, calls the unchanged instructor script, and validates existing splits before reusing them.
+- Colab uses `/content`, Colab Secrets for private-HF backup, and ZIP download for actual outputs. No Google Drive mount is required. Selected experiment defaults to E0 for initial setup.
+- Validation: 116 passed, 2 skipped; all three notebooks have expected cell counts and compilable Python code. Protected instructor paths have no diff. Colab GPU, remote backup, hard-reset resume, and experiment evidence remain NOT_RUN.
+
 ## Requirement checklist
 
 | Requirement | Implementation location | Verification / evidence |
