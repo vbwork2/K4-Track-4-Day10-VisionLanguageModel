@@ -31,8 +31,8 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 | CP01 | `2a3e4a5` | Six files; `git show --stat`: 253 insertions, 4 deletions; grouped split and six local overlays | CPU: 75 passed, 1 skipped; split metadata and all 2,009 image paths validated | Complete |
 | CP02 | `e692485` | Three files; `git show --stat`: 220 insertions, 3 deletions; prefix/mask/pad/image-token helpers | CPU: 80 passed, 1 skipped; Transformers/PyTorch processor integration **NOT_RUN** because those packages are absent | Complete |
 | CP03 | `24c176e` | Three files; `git show --stat`: 322 insertions, 3 deletions; NF4 exclusions, real-module discovery assertions, LoRA setup, FP32 projector island/state | CPU target-pattern check; actual model load and GPU dtype/gradient smoke **NOT_RUN** | Code complete; hardware check pending |
-| CP04 | Pending | `student/inference.py`, `student_tests/test_inference.py`; incremental JSONL, complete-set guard, original scorer invocation | CPU: 86 passed, 1 skipped overall; generation and evidence **NOT_RUN** | Code complete; GPU evidence pending |
-| CP05 | Pending | Per-step logs, complete atomic checkpoints, local and HF recovery, fault-injection tests | CPU checkpoint tests; Kaggle remote recovery | Pending |
+| CP04 | `9c33a8e` | Three files; `git show --stat`: 203 insertions, 3 deletions; incremental JSONL, complete-set guard, original scorer invocation | CPU: 86 passed, 1 skipped overall; generation and evidence **NOT_RUN** | Code complete; GPU evidence pending |
+| CP05 | Pending | `student/checkpointing.py`, `student/training.py`, structural/fault tests; atomic step directories, fingerprints, optimizer/scheduler/scaler/RNG state, metrics recovery, private-HF upload/download | CPU: 99 passed, 1 skipped; PyTorch save/load and Kaggle hard-reset remote recovery **NOT_RUN** | Code complete; durability verification pending |
 | CP06 | Pending | E1/E2/E3 inference, scorer evidence, metrics and annotated examples | Kaggle GPU | NOT_RUN |
 | CP07 | Pending | E4 rank 4/64 runs with controlled settings and evidence | Kaggle GPU | NOT_RUN |
 | CP08 | Pending | Pure Python IoU reward and unit tests; GRPO if resources permit | CPU reward tests; Kaggle GRPO | Pending |
@@ -50,7 +50,7 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 | Mask prompt and vision tokens | `student/dataset.py` | CPU tests cover prompt prefix, assistant-only labels, padding, and image token counting; image patch/grid concatenation is implemented but awaits a Qwen processor batch smoke test |
 | QLoRA E1/E2/E3 variants | `student/model.py` | Synthetic module-tree tests assert 252 LLM and 96 ViT targets; runtime code asserts loaded model counts and quantization exclusions. Real trainable counts, dtype, and gradient flow remain unverified without the pinned model stack on Kaggle. |
 | E0/E1/E2/E3/E4 inference | `student/inference.py` | CPU tests verify resume/ordering and that incomplete predictions never reach `score.py`; real Qwen inference/evidence remain **NOT_RUN** |
-| Durable training resume | `student/checkpointing.py`, `student/training.py` | Local fault injection; remote Kaggle kill/reboot test required |
+| Durable training resume | `student/checkpointing.py`, `student/training.py` | CPU tests verify corrupt/incomplete checks, dataset/setup/config mismatches, state restoration order, monotonic logs, and missing-secret failure. Actual PyTorch checkpoint write/read and Kaggle private-HF upload → session reset → download → resume still require Kaggle credentials and runtime. |
 | E5 reward | `student/reward.py` | Five required reward unit cases |
 | Vietnamese evidence-backed report | `REPORT.md` | Keep unanswered GPU-derived fields blank / NOT_RUN until actual evidence exists |
 | Kaggle run instructions | `docs/KAGGLE_RUNBOOK.md` | Manual consistency review against notebook and secrets setup |
