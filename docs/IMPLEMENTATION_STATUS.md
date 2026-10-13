@@ -35,8 +35,8 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 | CP05 | `61dd35c` | Five files; `git show --stat`: 1,044 insertions, 3 deletions; atomic step directories, fingerprints, optimizer/scheduler/scaler/RNG state, metrics recovery, private-HF upload/download | CPU structural checks: 99 passed, 1 skipped; PyTorch save/load and Kaggle hard-reset remote recovery **NOT_RUN** | Code complete; durability verification pending |
 | CP06 | `99057b0` | Seven files; `git show --stat`: 443 insertions, 5 deletions; E1/E2/E3 load/train/infer/score orchestration and annotated GT/Pred examples | CPU: 109 passed, 1 skipped; Kaggle predictions, evidence JSON, and six prediction overlays per setup **NOT_RUN** | Code complete; GPU evidence pending |
 | CP07 | `6e25023` | Three files; `git show --stat`: 158 insertions, 3 deletions; fixed-control rank pair and evidence comparison | CPU: 111 passed, 1 skipped; both Kaggle rank runs **NOT_RUN** | Code complete; GPU evidence pending |
-| CP08 | Pending | `student/reward.py`, `student_tests/test_reward.py`; class-aware greedy IoU reward, record conversion, five required cases | CPU: 112 passed, 1 skipped; GRPO **NOT_RUN** because local runtime has no PyTorch/CUDA or Kaggle session | Reward complete; optional GRPO pending |
-| CP09 | Pending | Preserve REPORT format; final test and submission checker review | CPU plus real Kaggle evidence | Pending |
+| CP08 | `98dae8f` | Three files; `git show --stat`: 111 insertions, 3 deletions; class-aware greedy IoU reward, record conversion, six reward/conversion cases | CPU: 112 passed, 1 skipped; GRPO **NOT_RUN** because local runtime has no PyTorch/CUDA or Kaggle session | Reward complete; optional GRPO pending |
+| CP09 | Pending | `lab_day10.ipynb` (22 cells), `kaggle_day10_qlora_resume.ipynb` (23 cells), Kaggle runbook, truthful REPORT status, split metadata validation, checkpoint integrity fix, final static/CPU checks | CPU: 113 passed, 2 skipped; compileall and notebook JSON/Python-cell checks pass; official checker: 6 FAIL, 1 WARN due missing Kaggle evidence, split metadata, and unfilled name; GPU **NOT_RUN** | Code and notebook ready; experiment evidence pending |
 
 ## Requirement checklist
 
@@ -54,5 +54,5 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 | Durable training resume | `student/checkpointing.py`, `student/training.py` | CPU tests verify corrupt/incomplete checks, dataset/setup/config mismatches, state restoration order, monotonic logs, and missing-secret failure. Actual PyTorch checkpoint write/read and Kaggle private-HF upload → session reset → download → resume still require Kaggle credentials and runtime. |
 | E5 reward | `student/reward.py` | CPU tests cover perfect match, malformed output, wrong class, hallucinated box, both empty, and split-record YOLO conversion. GRPO training is optional and remains **NOT_RUN**. |
 | Vietnamese evidence-backed report | `REPORT.md` | Keep unanswered GPU-derived fields blank / NOT_RUN until actual evidence exists |
-| Kaggle run instructions | `docs/KAGGLE_RUNBOOK.md` | Manual consistency review against notebook and secrets setup |
+| Kaggle run instructions | `docs/KAGGLE_RUNBOOK.md` | Branch import, T4/Internet, Add Input, secrets, checkpoints, evidence paths, E4 pair, and unverified remote hard-reset boundary documented |
 

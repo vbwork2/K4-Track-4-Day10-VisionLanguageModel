@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from scripts.labcommon import CLASSES
 from scripts.splitting import SPLITS, dataset_version
 from student.data import EXPECTED_COUNTS, validate_splits
@@ -30,6 +32,10 @@ def _write_dataset(root):
         "dataset_version": dataset_version(image_splits),
         "classes": list(CLASSES),
         "groups": groups,
+        "counts": {
+            split: {"images": 1, "boxes": {"pothole": 1, "crack": 0, "manhole": 0}}
+            for split in SPLITS
+        },
     }
     (root / "splits" / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
 
@@ -39,4 +45,14 @@ def test_validate_splits_checks_sessions_and_metadata(tmp_path):
     result = validate_splits(tmp_path, check_expected=False)
     assert result["meta"]["dataset_version"].startswith("d10-")
     assert len(result["sessions"]) == 3
+
+
+def test_validate_splits_rejects_mismatched_metadata_counts(tmp_path):
+    _write_dataset(tmp_path)
+    meta_path = tmp_path / "splits" / "meta.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    meta["counts"]["test"]["images"] = 2
+    meta_path.write_text(json.dumps(meta), encoding="utf-8")
+    with pytest.raises(ValueError, match="counts in metadata"):
+        validate_splits(tmp_path, check_expected=False)
 

@@ -106,8 +106,11 @@ def validate_checkpoint(checkpoint_dir, config_fingerprint=None, dataset_version
         if not isinstance(integrity, dict) or not integrity:
             return None
         for relative, attributes in integrity.items():
-            file_path = (root / relative).resolve()
-            if root.resolve() not in file_path.parents or not file_path.is_file():
+            relative_path = Path(relative)
+            if relative_path.is_absolute() or ".." in relative_path.parts:
+                return None
+            file_path = root / relative_path
+            if not file_path.is_file():
                 return None
             if file_path.stat().st_size != attributes.get("size"):
                 return None

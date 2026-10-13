@@ -2,7 +2,7 @@ import json
 
 from PIL import Image
 
-from student.visualization import render_prediction_examples
+from student.visualization import render_ground_truth_overlays, render_prediction_examples
 
 
 def test_render_examples_saves_gt_and_prediction_overlays(tmp_path):
@@ -31,4 +31,6 @@ def test_render_examples_saves_gt_and_prediction_overlays(tmp_path):
     assert paths[0].is_file()
     with Image.open(paths[0]) as saved:
         assert saved.size == (64, 36)
+    labels = render_ground_truth_overlays([row], image_root, tmp_path / "ground-truth", limit=1)
+    assert len(labels) == 1 and labels[0].is_file()
 

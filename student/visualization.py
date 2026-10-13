@@ -17,6 +17,29 @@ COLORS = {
 }
 
 
+def render_ground_truth_overlays(rows, image_root, output_dir, limit=6):
+    """Save local label-only overlays for the dataset preparation checklist."""
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    saved = []
+    for index, row in enumerate(rows[:limit], 1):
+        with Image.open(Path(image_root) / row["image_path"]) as source:
+            image = source.convert("RGB")
+        draw = ImageDraw.Draw(image)
+        for obj in row["objects"]:
+            box = yolo_to_box(obj, row["width"], row["height"], coord="norm1000")
+            xyxy = grounding_box_to_pixels(box, row["width"], row["height"], coord="norm1000")
+            color = COLORS.get(obj["label"], COLORS["other"])
+            draw.rectangle(xyxy, outline=color, width=3)
+            draw.text((xyxy[0], max(0, xyxy[1] - 14)), obj["label"], fill=color)
+        path = output_dir / f"ground_truth_{index:02d}_{row['image_id']}.jpg"
+        image.save(path, quality=90)
+        saved.append(path)
+    if len(saved) < min(limit, len(rows)):
+        raise ValueError(f"Only saved {len(saved)} ground-truth overlays")
+    return saved
+
+
 def render_prediction_examples(rows, prediction_path, image_root, output_dir, limit=6, coord="norm1000"):
     """Save up to limit real image overlays with GT and parsed model boxes."""
     predictions = {}

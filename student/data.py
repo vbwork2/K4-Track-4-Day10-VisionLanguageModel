@@ -54,6 +54,8 @@ def validate_splits(data_dir, check_expected=True, require_images=True):
 
     if meta.get("classes") != list(CLASSES):
         raise ValueError(f"Unexpected class order in split metadata: {meta.get('classes')}")
+    if meta.get("counts") != summaries:
+        raise ValueError("Split counts in metadata do not match the JSONL rows")
     computed_version = dataset_version(
         [(record["image_id"], split) for split, records in rows.items() for record in records]
     )
