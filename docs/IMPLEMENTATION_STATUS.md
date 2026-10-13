@@ -29,8 +29,8 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 |---|---|---|---|---|
 | CP00 | `96addb7` | `docs/IMPLEMENTATION_STATUS.md`; baseline `python -m pytest -q --basetemp .pytest-tmp` | CPU: 68 passed, 1 skipped | Complete |
 | CP01 | `2a3e4a5` | Six files; `git show --stat`: 253 insertions, 4 deletions; grouped split and six local overlays | CPU: 75 passed, 1 skipped; split metadata and all 2,009 image paths validated | Complete |
-| CP02 | Pending | `student/dataset.py`, `student_tests/test_dataset.py`; prefix/mask/pad/image-token helpers | CPU: 80 passed, 1 skipped; Transformers/PyTorch processor integration **NOT_RUN** because those packages are absent | Complete |
-| CP03 | Pending | NF4 model load, skip `visual`/`lm_head`, verified LoRA targets, projector dtype and state | Kaggle GPU | Pending |
+| CP02 | `e692485` | Three files; `git show --stat`: 220 insertions, 3 deletions; prefix/mask/pad/image-token helpers | CPU: 80 passed, 1 skipped; Transformers/PyTorch processor integration **NOT_RUN** because those packages are absent | Complete |
+| CP03 | Pending | `student/model.py`, `student_tests/test_model_targets.py`; NF4 exclusions, real-module discovery assertions, LoRA setup, FP32 projector island/state | CPU target-pattern check: 83 passed, 1 skipped overall; actual model load and GPU dtype/gradient smoke **NOT_RUN** | Code complete; hardware check pending |
 | CP04 | Pending | Resumable JSONL inference and canonical E0 scoring | Kaggle GPU | NOT_RUN |
 | CP05 | Pending | Per-step logs, complete atomic checkpoints, local and HF recovery, fault-injection tests | CPU checkpoint tests; Kaggle remote recovery | Pending |
 | CP06 | Pending | E1/E2/E3 inference, scorer evidence, metrics and annotated examples | Kaggle GPU | NOT_RUN |
@@ -48,7 +48,7 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 | Grouped split and dataset identity | Original `scripts/prepare_data.py`, `student/data.py` | `d10-21e4070301`; 18 sessions; train 1,422 / val 276 / test 311; class counts match README; all sessions remain in one split |
 | Convert YOLO boxes to JSON coordinates | `student/labels.py` | CPU tests cover norm1000/pixel, pixel conversion, clipping, empty labels, stable order, and invalid input |
 | Mask prompt and vision tokens | `student/dataset.py` | CPU tests cover prompt prefix, assistant-only labels, padding, and image token counting; image patch/grid concatenation is implemented but awaits a Qwen processor batch smoke test |
-| QLoRA E1/E2/E3 variants | `student/model.py` | Module target counts and trainable parameter diagnostics on Kaggle GPU |
+| QLoRA E1/E2/E3 variants | `student/model.py` | Synthetic module-tree tests assert 252 LLM and 96 ViT targets; runtime code asserts loaded model counts and quantization exclusions. Real trainable counts, dtype, and gradient flow remain unverified without the pinned model stack on Kaggle. |
 | E0/E1/E2/E3/E4 inference | `student/inference.py` and `student/experiments.py` | Incremental predictions; score only complete test runs |
 | Durable training resume | `student/checkpointing.py`, `student/training.py` | Local fault injection; remote Kaggle kill/reboot test required |
 | E5 reward | `student/reward.py` | Five required reward unit cases |
