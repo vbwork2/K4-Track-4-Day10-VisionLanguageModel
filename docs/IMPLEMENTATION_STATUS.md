@@ -27,8 +27,8 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 
 | Checkpoint | Commit | Files / checks | GPU / CPU | Status |
 |---|---|---|---|---|
-| CP00 | Pending | Audit, baseline tests, runtime and dataset availability; this ledger | CPU baseline: 68 passed, 1 skipped with workspace temp directory | In progress |
-| CP01 | Pending | Reuse original grouped split script; assert session isolation, expected counts, label overlays, label conversion tests | CPU | Pending |
+| CP00 | `96addb7` | `docs/IMPLEMENTATION_STATUS.md`; baseline `python -m pytest -q --basetemp .pytest-tmp` | CPU: 68 passed, 1 skipped | Complete |
+| CP01 | Pending | `student/data.py`, `student/labels.py`, `student_tests/`; original grouped split script; six local label overlays | CPU: 75 passed, 1 skipped; split metadata and all 2,009 image paths validated | Complete |
 | CP02 | Pending | Assistant-only labels, prefix check, vision concatenation, token-count diagnostic | CPU tests; processor integration awaits Kaggle | Pending |
 | CP03 | Pending | NF4 model load, skip `visual`/`lm_head`, verified LoRA targets, projector dtype and state | Kaggle GPU | Pending |
 | CP04 | Pending | Resumable JSONL inference and canonical E0 scoring | Kaggle GPU | NOT_RUN |
@@ -45,8 +45,8 @@ Evidence JSON and report measurements will be produced only by `scripts/score.py
 | Do not modify instructor scripts, tests, README, GUIDE, RUBRIC, or configs | Existing files | Compare tracked diffs and pre-edit hashes |
 | Keep original lab notebook structure | `lab_day10.ipynb` | Preserve 22 cells and all nine numbered sections; validate notebook JSON |
 | Use one synchronized pipeline | `student/`, both notebooks | Both entry points import the same package; notebook static checks |
-| Grouped split and dataset identity | Original `scripts/prepare_data.py`, `student/` validation | Metadata counts, `dataset_version`, disjoint sessions |
-| Convert YOLO boxes to JSON coordinates | `student/labels.py` | Unit tests for round-trip, clipping, empty labels, stable ordering |
+| Grouped split and dataset identity | Original `scripts/prepare_data.py`, `student/data.py` | `d10-21e4070301`; 18 sessions; train 1,422 / val 276 / test 311; class counts match README; all sessions remain in one split |
+| Convert YOLO boxes to JSON coordinates | `student/labels.py` | CPU tests cover norm1000/pixel, pixel conversion, clipping, empty labels, stable order, and invalid input |
 | Mask prompt and vision tokens | `student/dataset.py` | Prefix, loss mask, padding, and vision concatenation tests |
 | QLoRA E1/E2/E3 variants | `student/model.py` | Module target counts and trainable parameter diagnostics on Kaggle GPU |
 | E0/E1/E2/E3/E4 inference | `student/inference.py` and `student/experiments.py` | Incremental predictions; score only complete test runs |
