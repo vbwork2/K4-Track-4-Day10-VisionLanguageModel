@@ -88,6 +88,20 @@ def last_logged_step(metrics_path):
     return last
 
 
+def metric_summary(metrics_path):
+    events = []
+    path = Path(metrics_path)
+    if path.is_file():
+        with path.open(encoding="utf-8") as stream:
+            events = [json.loads(line) for line in stream if line.strip()]
+    steps = [event for event in events if event.get("event") == "train_step"]
+    return {
+        "global_step": int(steps[-1]["step"]) if steps else 0,
+        "peak_gpu_gb": max((float(event.get("peak_gpu_gb", 0)) for event in steps), default=0.0),
+        "elapsed_seconds": float(steps[-1].get("elapsed_seconds", 0)) if steps else 0.0,
+    }
+
+
 def rebuild_train_log(metrics_path, train_log_path):
     """Recreate the optional text log from the checkpointed canonical metrics."""
     source = Path(metrics_path)
@@ -268,10 +282,12 @@ def train_model(
         elapsed_before = restored["elapsed_seconds"]
         rebuild_train_log(metrics_path, train_log_path)
         if starting_step >= options.max_steps:
+            summary = metric_summary(metrics_path)
             manifest.update({
                 "status": "trained",
                 "completed_steps": starting_step,
-                "train_minutes": elapsed_before / 60,
+                "train_minutes": max(elapsed_before, summary["elapsed_seconds"]) / 60,
+                "peak_gpu_gb": summary["peak_gpu_gb"],
                 "finished_at_utc": utc_now(),
             })
             atomic_write_json(active_run_json, manifest)
@@ -398,11 +414,12 @@ def train_model(
                 )
 
         elapsed_total = elapsed_before + time.monotonic() - started
+        summary = metric_summary(metrics_path)
         manifest.update({
             "status": "trained",
             "completed_steps": options.max_steps,
             "train_minutes": elapsed_total / 60,
-            "peak_gpu_gb": float(torch.cuda.max_memory_allocated() / (1024 ** 3)),
+            "peak_gpu_gb": max(summary["peak_gpu_gb"], float(torch.cuda.max_memory_allocated() / (1024 ** 3))),
             "finished_at_utc": utc_now(),
         })
         atomic_write_json(active_run_json, manifest)

@@ -6,6 +6,7 @@ from student.training import (
     TrainingOptions,
     append_metric,
     last_logged_step,
+    metric_summary,
     rebuild_train_log,
     sample_indices,
 )
@@ -35,6 +36,16 @@ def test_existing_duplicate_metric_steps_are_detected(tmp_path):
     )
     with pytest.raises(ValueError, match="increase strictly"):
         last_logged_step(path)
+
+
+def test_metric_summary_uses_cumulative_elapsed_and_peak_values(tmp_path):
+    path = tmp_path / "metrics.jsonl"
+    events = [
+        {"event": "train_step", "step": 1, "elapsed_seconds": 12, "peak_gpu_gb": 6.5},
+        {"event": "train_step", "step": 2, "elapsed_seconds": 25, "peak_gpu_gb": 7.0},
+    ]
+    path.write_text("".join(json.dumps(event) + "\n" for event in events), encoding="utf-8")
+    assert metric_summary(path) == {"global_step": 2, "peak_gpu_gb": 7.0, "elapsed_seconds": 25.0}
 
 
 def test_rebuild_text_log_discards_steps_beyond_restored_metrics(tmp_path):
