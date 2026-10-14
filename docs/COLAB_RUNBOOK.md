@@ -1,15 +1,16 @@
-# Chạy Day 10 trên Google Colab
+# Chạy lại bài Day 10 trên Colab
 
-Notebook chính: `colab_day10_qlora_resume.ipynb`. Notebook lab vẫn có đúng 22 cell; cả Colab và Kaggle gọi cùng pipeline `student/`.
+Notebook chạy thực tế: `colab_day10_qlora_resume.ipynb`; notebook theo bố cục đề: `lab_day10.ipynb`. Cả hai gọi pipeline trong `student/`.
 
-1. Mở notebook từ nhánh `feat/day10-kaggle-qlora` trong Colab bằng tài khoản Google của bạn. Có thể lưu bản sao vào Drive để giữ cấu hình và outputs.
-2. Chọn Runtime → Change runtime type → T4 GPU. Nếu tài khoản không được cấp GPU, dừng và thử lại khi có tài nguyên; notebook kiểm tra CUDA trước khi chạy model.
-3. Mặc định `EXPERIMENT="E0"`. Chạy cell cấu hình, cài package và preflight trước. Dataset công khai được tải bằng `kagglehub`, rồi chia bằng script gốc. Không cần Kaggle CLI hoặc Kaggle account cho đường tải công khai; nếu dịch vụ yêu cầu đăng nhập/chặn tải, dùng `DATASET_ZIP` hoặc `DATA_SOURCE_DIR`.
-4. Để chạy E1–E4, thêm Colab Secrets `HF_TOKEN` (quyền ghi) và `HF_REPO_ID` (dạng `username/day10-qwen3vl-checkpoints`), bật Notebook access. Repo backup phải private. Không dán token vào code hoặc output.
-5. Chạy các cell theo thứ tự. Mỗi lượt chọn một experiment: E0, E1, E2, E3, rồi E4. E4 tự chạy rank 4 và 64, baseline E1. Giữ 300 bước, micro batch 1, accumulation 8, checkpoint mỗi 25 bước.
-6. Sau sự cố, mở lại cùng notebook, cùng cấu hình và Secrets, chạy lại từ đầu. Runner tìm checkpoint hợp lệ mới nhất local/HF, kiểm tra fingerprint rồi khôi phục. Không đổi branch/code revision hoặc tham số khi muốn resume. Khi remote backup thất bại, run dừng và giữ checkpoint local.
-7. Cell cuối tải ZIP `e0_logs_evidence.zip` (hoặc E1/E2/E3/E4 tương ứng). ZIP chứa evidence thật, predictions, logs, hình minh họa; checkpoint và trọng số lưu trên HF. Tải ZIP sau mỗi experiment vì file trong `/content` có thể mất khi runtime bị xóa.
+1. Mở notebook từ nhánh `main`, chọn runtime T4 GPU.
+2. Chạy các cell theo thứ tự. Mặc định `EXPERIMENTS=["E0", "E1", "E2", "E3", "E4"]`; có thể chọn riêng một thí nghiệm. Dataset công khai được tải bằng `kagglehub`, chia bằng script gốc. Có thể dùng `DATASET_ZIP` hoặc `DATA_SOURCE_DIR`.
+3. Với E1–E4, thêm Colab Secrets `HF_TOKEN` có quyền ghi và `HF_REPO_ID` trỏ tới repo private. Bật Notebook access; không ghi token vào code/output.
+4. Huấn luyện 300 bước, micro-batch 1, tích luỹ 8, checkpoint mỗi 25 bước. E4 chạy rank 4/64, alpha=2r, baseline E1. Kết quả nộp cho thấy E3 tốt nhất; E4 hiện chưa đáp ứng yêu cầu ablation trên setup tốt nhất.
+5. Sau gián đoạn, chạy lại cùng cấu hình và Secrets. Runner kiểm tra checkpoint local/HF và fingerprint trước khi khôi phục. ZIP được cung cấp chưa chứng minh khôi phục sau hard reset.
+6. Tải `e0_e4_logs_evidence.zip` ở cell cuối. ZIP gồm dự đoán, bằng chứng, log và ảnh; trọng số/checkpoint lưu trên HF. Sau khi runtime mất, output local có thể cần sinh lại.
 
-Google account chỉ xác định notebook và runtime Colab; HF Secrets dùng tài khoản Hugging Face của bạn. Notebook không chứa email hoặc token. Không cần mount Drive để pipeline chạy.
+Notebook giữ `CODE_REVISION=19525bd179bc2c3942dbd066fd1690c04e132572` để tương thích fingerprint của lần chạy đã nộp; cell vá đồng bộ cấu hình lượng tử hoá và vòng train với mã đã chạy. Không đổi revision/cấu hình giữa chừng nếu muốn resume checkpoint cũ.
 
-Lượt triển khai mới chỉ xác minh CPU/static. Chưa chạy GPU hoặc thử mất runtime → tải remote checkpoint → resume trên Colab. REPORT giữ NOT_RUN cho đến khi có evidence thật. Yêu cầu chạy GPU trên Kaggle trước đây được thay bằng Colab theo chỉ dẫn mới của người dùng.
+Các sửa lỗi được giữ trong mã nộp: bỏ backend `torchao` không tương thích, loại `model.visual` và `lm_head` khỏi lượng tử hoá, giảm loss scale rồi thử lại khi gradient FP16 tràn số. Scheduler và bước log chỉ tăng sau cập nhật thành công.
+
+Bằng chứng thật E0–E4 nằm trong `report/evidence/`, nhật ký tài nguyên ở `report/logs/`; số liệu và giới hạn ở `REPORT.md`. Chạy kiểm tra nộp bằng `python scripts/check_submission.py`.

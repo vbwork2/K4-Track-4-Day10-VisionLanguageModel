@@ -13,3 +13,13 @@ adapter*/
 .pytest_cache/
 .DS_Store
 e0_e4_logs_evidence.zip
+INSTRUCTION_CODEX_DAY10_KAGGLE.md
+docs/IMPLEMENTATION_STATUS.md
+docs/KAGGLE_RUNBOOK.md
+kaggle_day10_qlora_resume.ipynb
+report/logs/*/train.log
+report/evidence/figures/e0/
+report/evidence/figures/e1/
+report/evidence/figures/e2/
+report/evidence/figures/e4_rank_4/
+report/evidence/figures/e4_rank_64/

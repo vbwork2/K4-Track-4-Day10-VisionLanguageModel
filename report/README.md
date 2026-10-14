@@ -18,7 +18,7 @@ to ablate the best setup. The two E4 manifests otherwise differ only in rank
 and its required alpha adjustment.
 
 `logs/<submitted-name>/` contains the unmodified, small `run.json`,
-`metrics.jsonl` and `train.log` files for each trained run. Each metrics file
+`metrics.jsonl` files for each trained run. Each metrics file
 contains steps 1–300 exactly once, with finite losses and gradient norms.
 Evidence resource metadata matches the corresponding manifest; peak VRAM
 matches the largest value in the step logs. There is no hardware inventory in
@@ -41,8 +41,8 @@ six supplied evidence files within 1e-12 floating-point tolerance (summation
 order can slightly change mean IoU). `analysis/e3_wrong_coord_pixel.json` is
 an intentional scoring control using the same E3 outputs with the wrong
 coordinate interpretation; it is separate from the six experiment results.
-The report includes six E3 images with per-image TP/FP/FN descriptions; all
-36 supplied GT/Pred illustrations are retained in `evidence/figures/`.
+The report includes six E3 images with per-image TP/FP/FN descriptions; the
+six required E3 GT/Pred illustrations are retained in `evidence/figures/`.
 
 Validation on 2026-10-14: full suite 118 passed, 4 skipped, 1 failed. The original test_report_template_has_student_markers_and_ten_questions requires the unfilled name marker, while the submission checker forbids it. Instructor tests are unchanged; excluding only this contradictory template test gives 118 passed, 4 skipped, 1 deselected. Submission checker:
 0 FAIL, 0 WARN with locally regenerated split metadata. A fresh clone without

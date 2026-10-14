@@ -171,9 +171,32 @@ def _autocast(torch):
 
 def _grad_scaler(torch):
     try:
-        return torch.amp.GradScaler("cuda", enabled=True)
+        return torch.amp.GradScaler("cuda", enabled=True, init_scale=1024.0)
     except AttributeError:
-        return torch.cuda.amp.GradScaler(enabled=True)
+        return torch.cuda.amp.GradScaler(enabled=True, init_scale=1024.0)
+
+
+def _try_optimizer_step(torch, optimizer, scaler, train_params, max_grad_norm):
+    """Reduce loss scale after overflow without counting an optimizer update."""
+    scaler.unscale_(optimizer)
+    # Check individual gradients before clipping, which can spread NaNs.
+    checks = [torch.isfinite(parameter.grad).all() for parameter in train_params if parameter.grad is not None]
+    if not checks:
+        raise RuntimeError("No trainable parameter received a gradient")
+    finite = torch.stack(checks).all().item()
+    if not finite:
+        scaler.update()
+        optimizer.zero_grad(set_to_none=True)
+        return None
+    grad_norm = float(torch.nn.utils.clip_grad_norm_(train_params, max_grad_norm).item())
+    if not math.isfinite(grad_norm):
+        optimizer.zero_grad(set_to_none=True)
+        raise FloatingPointError("Gradient norm overflowed even though individual gradients are finite")
+    learning_rate = float(optimizer.param_groups[0]["lr"])
+    scaler.step(optimizer)
+    scaler.update()
+    optimizer.zero_grad(set_to_none=True)
+    return grad_norm, learning_rate
 
 
 def _run_manifest(repo_root, dataset_version, options, config_fingerprint, trainable_params,
@@ -333,39 +356,34 @@ def train_model(
     atomic_write_json(active_run_json, manifest)
     try:
         for step in range(starting_step + 1, options.max_steps + 1):
-            loss_total = 0.0
-            for micro_step in range(options.grad_accum):
-                indices = sample_indices(
-                    len(train_rows), step, micro_step, options.micro_batch_size, options.seed
-                )
-                examples = [
-                    _encode_record(train_rows[index], data_dir, bundle.processor, options.coordinate_scale)
-                    for index in indices
-                ]
-                batch = collate_examples(examples, bundle.processor, device="cuda:0")
-                with _autocast(torch):
-                    output = bundle.model(**batch)
-                    loss = output.loss / options.grad_accum
-                if not torch.isfinite(loss):
-                    raise FloatingPointError(f"Non-finite loss at optimizer step {step}: {loss.detach().item()}")
-                scaler.scale(loss).backward()
-                loss_total += float(loss.detach().item()) * options.grad_accum
-                del batch, examples, output, loss
+            for attempt in range(12):
+                loss_total = 0.0
+                for micro_step in range(options.grad_accum):
+                    indices = sample_indices(
+                        len(train_rows), step, micro_step, options.micro_batch_size, options.seed
+                    )
+                    examples = [
+                        _encode_record(train_rows[index], data_dir, bundle.processor, options.coordinate_scale)
+                        for index in indices
+                    ]
+                    batch = collate_examples(examples, bundle.processor, device="cuda:0")
+                    with _autocast(torch):
+                        output = bundle.model(**batch)
+                        loss = output.loss / options.grad_accum
+                    if not torch.isfinite(loss):
+                        raise FloatingPointError(f"Non-finite loss at optimizer step {step}: {loss.detach().item()}")
+                    scaler.scale(loss).backward()
+                    loss_total += float(loss.detach().item()) * options.grad_accum
+                    del batch, examples, output, loss
 
-            scaler.unscale_(optimizer)
-            grad_norm_tensor = torch.nn.utils.clip_grad_norm_(train_params, options.max_grad_norm)
-            grad_norm = float(grad_norm_tensor.detach().item())
-            if not math.isfinite(grad_norm):
-                raise FloatingPointError(f"Non-finite gradient norm at optimizer step {step}: {grad_norm}")
-            scale_before = scaler.get_scale()
-            learning_rate_used = float(optimizer.param_groups[0]["lr"])
-            scaler.step(optimizer)
-            scaler.update()
-            if scaler.get_scale() < scale_before:
-                optimizer.zero_grad(set_to_none=True)
-                raise FloatingPointError(f"GradScaler skipped the optimizer update at step {step}")
+                update = _try_optimizer_step(torch, optimizer, scaler, train_params, options.max_grad_norm)
+                if update is not None:
+                    grad_norm, learning_rate_used = update
+                    break
+                print(f"Retry step {step} after FP16 gradient overflow; loss scale={scaler.get_scale():g}", flush=True)
+            else:
+                raise FloatingPointError(f"Persistent non-finite gradients at optimizer step {step} after 12 attempts")
             scheduler.step()
-            optimizer.zero_grad(set_to_none=True)
 
             elapsed = elapsed_before + time.monotonic() - started
             duration = max(elapsed - float(manifest.get("last_elapsed_seconds", elapsed_before)), 1e-9)
