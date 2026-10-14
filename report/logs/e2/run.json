@@ -1,0 +1,82 @@
+{
+  "run_id": "e2",
+  "git_sha": "19525bd179bc2c3942dbd066fd1690c04e132572",
+  "dataset_version": "d10-21e4070301",
+  "setup": "E2",
+  "config_fingerprint": "d9ac1d7fe75c7d507d01ebb5cf62f88f4270382ebc4f3fde796fdfa1eeea1598",
+  "model_id": "Qwen/Qwen3-VL-4B-Instruct",
+  "seed": 42,
+  "training_options": {
+    "setup": "E2",
+    "max_steps": 300,
+    "learning_rate": 0.0002,
+    "micro_batch_size": 1,
+    "grad_accum": 8,
+    "checkpoint_every": 25,
+    "seed": 42,
+    "max_grad_norm": 1.0,
+    "warmup_fraction": 0.05,
+    "coordinate_scale": "norm1000",
+    "require_remote_backup": true
+  },
+  "trainable_params": 142135296,
+  "package_versions": {
+    "torch": "2.11.0+cu130",
+    "transformers": "5.19.0",
+    "peft": "0.21.2",
+    "accelerate": "1.15.0",
+    "bitsandbytes": "0.50.2",
+    "trl": "1.9.2",
+    "huggingface_hub": "1.33.0"
+  },
+  "started_at_utc": "2026-10-14T02:56:03.198109+00:00",
+  "status": "trained",
+  "config": {
+    "model_id": "Qwen/Qwen3-VL-4B-Instruct",
+    "experiment": "E2",
+    "base_setup": "E2",
+    "dataset_version": "d10-21e4070301",
+    "rank": 16,
+    "alpha": 32,
+    "dropout": 0.05,
+    "training_options": {
+      "setup": "E2",
+      "max_steps": 300,
+      "learning_rate": 0.0002,
+      "micro_batch_size": 1,
+      "grad_accum": 8,
+      "checkpoint_every": 25,
+      "seed": 42,
+      "max_grad_norm": 1.0,
+      "warmup_fraction": 0.05,
+      "coordinate_scale": "norm1000",
+      "require_remote_backup": true
+    },
+    "lora_targets": "llm",
+    "prompt_sha256": "13d534a88b65234387bf8a94a011c9071f877f8d1b0b60c391d80827d2f35ccd",
+    "coordinate_scale": "norm1000",
+    "code_revision": "19525bd179bc2c3942dbd066fd1690c04e132572",
+    "model_config": {
+      "name": "E2",
+      "description": "E1 + mở đầy đủ projector (visual.merger và visual.deepstack_merger_list).",
+      "model_id": "Qwen/Qwen3-VL-4B-Instruct",
+      "quantization": "nf4-4bit",
+      "lora": {
+        "r": 16,
+        "alpha": 32,
+        "dropout": 0.05,
+        "targets": "llm"
+      },
+      "train_projector": true,
+      "lr": 0.0002,
+      "batch_size": 2,
+      "grad_accum": 4,
+      "max_steps": 300,
+      "seed": 42
+    }
+  },
+  "completed_steps": 300,
+  "train_minutes": 13.747306870900001,
+  "peak_gpu_gb": 6.772157192230225,
+  "finished_at_utc": "2026-10-14T02:56:04.538869+00:00"
+}

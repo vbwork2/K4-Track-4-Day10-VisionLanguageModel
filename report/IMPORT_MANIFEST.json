@@ -1,0 +1,66 @@
+{
+  "source_archive": "e0_e4_logs_evidence.zip",
+  "source_archive_sha256": "af73d20830c46d488777c2d22bb735eb1854955edaeda9f6932f8733ae03e656",
+  "dataset_version": "d10-21e4070301",
+  "runs": {
+    "e0": {
+      "source_run_id": "e0",
+      "predictions_sha256": "c6a89b50da0144b6660a0f93cd85425a4a65ee4bd51bb7dc6e001853c4735c78",
+      "canonical_score_matches_source": true,
+      "prediction_count": 311
+    },
+    "e1": {
+      "source_run_id": "e1",
+      "predictions_sha256": "8475bab7467945c9b833690443c7182f168fb1181817c45fb2160a5f1d85fbf2",
+      "canonical_score_matches_source": true,
+      "prediction_count": 311,
+      "first_loss": 1.1267287284135818,
+      "last_loss": 0.5395702756941319,
+      "last_step_elapsed_minutes": 62.64792702528333,
+      "manifest_train_minutes": 62.64792702528333
+    },
+    "e2": {
+      "source_run_id": "e2",
+      "predictions_sha256": "36340378895eba7c893aa7e30e77ec31294db483da3fb8028caa4cad2dce02e1",
+      "canonical_score_matches_source": true,
+      "prediction_count": 311,
+      "first_loss": 1.127490870654583,
+      "last_loss": 0.5293672680854797,
+      "last_step_elapsed_minutes": 13.747306870900001,
+      "manifest_train_minutes": 13.747306870900001
+    },
+    "e3": {
+      "source_run_id": "e3",
+      "predictions_sha256": "192a4c0f51ab9d74343a5fa1ee165a6f8adf6ca392b4b9c5c3da7a9097437569",
+      "canonical_score_matches_source": true,
+      "prediction_count": 311,
+      "first_loss": 1.127490870654583,
+      "last_loss": 0.5123323239386082,
+      "last_step_elapsed_minutes": 16.6481667983,
+      "manifest_train_minutes": 16.9951998789
+    },
+    "e4_rank_4": {
+      "source_run_id": "e4_rank_4_base_e1",
+      "predictions_sha256": "0b5ce9f90adafd68d9a68ebc62a4ebeec57be553bca30c0df43052a216636856",
+      "canonical_score_matches_source": true,
+      "prediction_count": 311,
+      "first_loss": 1.1265057772397995,
+      "last_loss": 0.553815770894289,
+      "last_step_elapsed_minutes": 10.528576406799994,
+      "manifest_train_minutes": 10.573612314233333
+    },
+    "e4_rank_64": {
+      "source_run_id": "e4_rank_64_base_e1",
+      "predictions_sha256": "ccf89395b84f0aec05166df6ea7f64ad3ff4dbe63c1297bedae1bdbb43293b1d",
+      "canonical_score_matches_source": true,
+      "prediction_count": 311,
+      "first_loss": 1.1265057772397995,
+      "last_loss": 0.5289314612746239,
+      "last_step_elapsed_minutes": 13.302250823116674,
+      "manifest_train_minutes": 13.602198784033332
+    }
+  },
+  "e4_controls_match_except_rank_and_alpha": true,
+  "e4_base_setup": "E1",
+  "best_observed_setup": "E3"
+}
